@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/main.dir/test.cpp.o -o main  -Wl,-rpath,/home/qcl/Labs/cpp/monolibs/build/monolibs monolibs/libmonolibs.so fmt/libfmt.a 
