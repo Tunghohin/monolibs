@@ -1,3 +1,4 @@
+#include <fmt/base.h>
 #include <functional.h>
 #include <iostream>
 
@@ -7,7 +8,7 @@ typedef struct pfunc_args_t {
     int x;
 } pfunc_args_t;
 
-auto say_hello(void* args) {
+auto say_hello(void* args) -> void {
     std::cout << "hello" << std::endl;
     if (args != NULL) {
         pfunc_args_t pfunc_args = *(pfunc_args_t*)args;
@@ -15,7 +16,7 @@ auto say_hello(void* args) {
     }
 }
 
-auto say_world(void* args) {
+auto say_world(void* args) -> void {
     std::cout << "world" << std::endl;
     if (args != NULL) {
         pfunc_args_t pfunc_args = *(pfunc_args_t*)args;
@@ -23,17 +24,12 @@ auto say_world(void* args) {
     }
 }
 
-auto do_func(pfunc_t func, void* args) { func(args); }
-
 auto main() -> int {
-    pfunc_t func = say_hello;
-    pfunc_args_t args = {2};
-
-    do_func(func, &args);
-    do_func(say_world, NULL);
-
-    int res = mono::func(7);
-    std::cout << res << std::endl;
-
+    mono::function<void(void*)> func = say_hello;
+    func(NULL);
+    func = say_world;
+    func(NULL);
+    func = [](void*) { std::cout << "hohoho" << std::endl; };
+    func(NULL);
     return 0;
 }
