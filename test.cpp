@@ -20,5 +20,6 @@ int ret_int() {
 auto main() -> int {
     mono::invoke_and_time(func);
     auto ret = mono::invoke_and_time(ret_int);
+    fmt::println("{}", std::bool_constant<true>::value);
     return 0;
 }
