@@ -58,6 +58,23 @@ auto invoke_and_time(Fn f) -> decltype(f()) {
     }
 }
 
+// compile time fibonacci sequence
+template <int N>
+struct fibonacci {
+    static constexpr int value =
+        fibonacci<N - 1>::value + fibonacci<N - 2>::value;
+};
+
+template <>
+struct fibonacci<1> {
+    static constexpr int value = 1;
+};
+
+template <>
+struct fibonacci<2> {
+    static constexpr int value = 1;
+};
+
 } // namespace mono
 
 #endif

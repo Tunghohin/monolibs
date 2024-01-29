@@ -1,25 +1,27 @@
 #include <chrono>
 #include <fmt/base.h>
 #include <functional.h>
-#include <iostream>
 #include <thread>
-#include <type_traits>
 #include <utility.h>
 
-void func() {
-    std::this_thread::sleep_for(std::chrono::milliseconds(123));
-    return;
-}
+template <int N>
+struct fibonacci {
+    static constexpr int value =
+        fibonacci<N - 1>::value + fibonacci<N - 2>::value;
+};
 
-int ret_int() {
+template <>
+struct fibonacci<1> {
+    static constexpr int value = 1;
+};
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(233));
-    return 233;
-}
+template <>
+struct fibonacci<2> {
+    static constexpr int value = 1;
+};
 
 auto main() -> int {
-    mono::invoke_and_time(func);
-    auto ret = mono::invoke_and_time(ret_int);
-    fmt::println("{}", std::bool_constant<true>::value);
+    constexpr int res = fibonacci<10>::value;
+    fmt::println("{}", res);
     return 0;
 }

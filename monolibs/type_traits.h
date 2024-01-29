@@ -1,12 +1,14 @@
 #ifndef __MONOLIBS_TYPE_TRAITS_H
 #define __MONOLIBS_TYPE_TRAITS_H
 
+#include <type_traits>
 namespace mono {
 
 template <typename T, T v>
 struct integral_constant {
-    static constexpr T value = v;
     using value_type = T;
+    static constexpr T value = v;
+
     using type = integral_constant<T, v>;
 
     constexpr operator value_type() const noexcept { return value; }
@@ -29,8 +31,17 @@ struct is_void : false_type {};
 template <>
 struct is_void<void> : true_type {};
 
+template <typename T, typename U>
+struct is_same : false_type {};
+
+template <typename T>
+struct is_same<T, T> : true_type {};
+
 template <typename T>
 constexpr bool is_void_v = is_void<T>::value;
+
+template <typename T, typename U>
+constexpr bool is_same_v = is_same<T, U>::value;
 
 } // namespace mono
 
