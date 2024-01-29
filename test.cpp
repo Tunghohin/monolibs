@@ -22,6 +22,6 @@ struct fibonacci<2> {
 
 auto main() -> int {
     constexpr int res = fibonacci<10>::value;
-    fmt::println("{}", res);
+    fmt::println("{}", mono::cppdemangle<decltype(res)>());
     return 0;
 }
