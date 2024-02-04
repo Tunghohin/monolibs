@@ -11,12 +11,19 @@ struct generic_vector {
     T pos[N];
     int dimension = N;
 
+    generic_vector();
     template <typename... Args>
         requires std::is_same_v<std::common_type_t<Args...>, T>
     generic_vector(Args...);
 
-    constexpr auto operator[](size_t const idx) const -> T;
+    auto operator[](size_t const idx) -> T&;
+    auto operator[](size_t const idx) const -> T const&;
 };
+
+template <typename T, int N>
+generic_vector<T, N>::generic_vector() {
+    std::fill(this->pos, this->pos + N, T());
+}
 
 template <typename T, int N>
 template <typename... Args>
@@ -29,7 +36,12 @@ generic_vector<T, N>::generic_vector(Args... args) {
 }
 
 template <typename T, int N>
-constexpr auto generic_vector<T, N>::operator[](size_t const idx) const -> T {
+auto generic_vector<T, N>::operator[](size_t const idx) -> T& {
+    return this->pos[idx % this->dimension];
+}
+
+template <typename T, int N>
+auto generic_vector<T, N>::operator[](size_t const idx) const -> T const& {
     return this->pos[idx % this->dimension];
 }
 
@@ -58,9 +70,23 @@ struct vector3 : public generic_vector<T, 3> {
 };
 
 template <typename T, int N, int M>
-struct matric {
-    generic_vector<T, M> pos[N];
+struct matrix {
+    generic_vector<generic_vector<T, M>, N> pos;
+
+    auto operator[](size_t const idx) -> generic_vector<T, M>&;
+    auto operator[](size_t const idx) const -> generic_vector<T, M> const&;
 };
+
+template <typename T, int N, int M>
+auto matrix<T, N, M>::operator[](size_t const idx) -> generic_vector<T, M>& {
+    return pos[idx];
+}
+
+template <typename T, int N, int M>
+auto matrix<T, N, M>::operator[](size_t const idx) const
+    -> generic_vector<T, M> const& {
+    return pos[idx];
+}
 
 } // namespace mono
 

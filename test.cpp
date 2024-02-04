@@ -7,7 +7,13 @@
 #include <vector>
 
 auto main() -> int {
-    mono::vector2<double> v(2.1, 3.3);
-    fmt::println("{}", v[-1]);
+    mono::matrix<float, 3, 4> m;
+    m[3][4] = 4;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 4; j++) {
+            fmt::print("{} ", m[i][j]);
+        }
+        fmt::println("");
+    }
     return 0;
 }
