@@ -8,6 +8,8 @@
 #include <vector>
 
 auto main() -> int {
+    spdlog::set_level(spdlog::level::debug);
+    spdlog::debug("asdf");
     fmt::print("{}\n", 233);
     return 0;
 }
