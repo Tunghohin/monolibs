@@ -3,7 +3,7 @@
 
 #include <array>
 #include <chrono>
-#include <fmt/base.h>
+#include <spdlog/fmt/bundled/core.h>
 #include <string>
 #include <type_traits>
 #include <typeinfo>
@@ -27,7 +27,7 @@ constexpr auto sum(Arg0 arg0, Args... args) -> std::common_type_t<Args...> {
 
 template <typename Arg0, typename... Args>
 constexpr auto display(Arg0&& arg0, Args&&... args) -> void {
-    fmt::println("{}", arg0);
+    fmt::print("{}\n", arg0);
     if constexpr (sizeof...(args))
         display(std::forward<Args>(args)...);
 }
@@ -52,14 +52,14 @@ auto invoke_and_time(Fn f) -> decltype(f()) {
         auto end_time = std::chrono::steady_clock::now();
         auto duration =
             std::chrono::duration<double, std::milli>(end_time - start_time);
-        fmt::println("{}", duration.count());
+        fmt::print("{}\n", duration.count());
         return;
     } else {
         auto ret = f();
         auto end_time = std::chrono::steady_clock::now();
         auto duration =
             std::chrono::duration<double, std::milli>(end_time - start_time);
-        fmt::println("{}", duration.count());
+        fmt::print("{}\n", duration.count());
         return ret;
     }
 }
@@ -111,6 +111,15 @@ static std::string cppdemangle() {
     if (std::is_rvalue_reference_v<T>)
         s += " &&";
     return s;
+}
+
+template <typename T>
+auto lrvalue_test(T&& obj) -> void {
+    if constexpr (std::is_rvalue_reference_v<decltype(std::forward<T>(obj))>) {
+        fmt::print("is rvalue\n");
+    } else {
+        fmt::print("is lvalue\n");
+    }
 }
 
 } // namespace mono
