@@ -2,6 +2,7 @@
 #define __MONOLIBS_UTILITY_H
 
 #include <array>
+#include <atomic>
 #include <chrono>
 #include <spdlog/fmt/bundled/core.h>
 #include <string>
@@ -121,6 +122,18 @@ auto lrvalue_test(T&& obj) -> void {
         fmt::print("is lvalue\n");
     }
 }
+
+class spin_lock {
+public:
+    auto lock() -> void {
+        while (flag_.test_and_set(std::memory_order_acquire)) {
+        };
+    }
+    auto unlock() -> void { flag_.clear(std::memory_order_release); }
+
+private:
+    std::atomic_flag flag_ = ATOMIC_FLAG_INIT;
+};
 
 } // namespace mono
 

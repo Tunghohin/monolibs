@@ -1,24 +1,20 @@
-#include "utility.h"
-#include <algorithm>
-#include <linear_algebra.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <design_pattern.h>
+#include <iostream>
 #include <memory>
-#include <numeric>
 #include <spdlog/fmt/bundled/core.h>
-#include <spdlog/spdlog.h>
 #include <type_traits>
 #include <utility>
-#include <vector>
 
-auto takes_and_gives(std::unique_ptr<std::string> uptr)
-    -> std::unique_ptr<std::string> {
-    *uptr += "asdf";
-    return uptr;
-}
+class Log : public mono::Singleton<Log, true> {
+public:
+    auto log() -> void { fmt::print("log\n"); }
+};
 
-auto main() -> int {
-    auto uptr = std::make_unique<std::string>("aaa");
-    mono::lrvalue_test(uptr);
-    mono::lrvalue_test(takes_and_gives(std::move(uptr)));
+const int n = 5;
+int arr[n] = {3, 2, 4, 5, 1};
 
-    return 0;
-}
+auto main() -> int {}
