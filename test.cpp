@@ -1,20 +1,24 @@
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <design_pattern.h>
+#include <array>
 #include <iostream>
-#include <memory>
-#include <spdlog/fmt/bundled/core.h>
-#include <type_traits>
-#include <utility>
+#include <memory_resource>
+#include <numeric>
 
-class Log : public mono::Singleton<Log, true> {
-public:
-    auto log() -> void { fmt::print("log\n"); }
-};
+#include <design_pattern.h>
 
-const int n = 5;
-int arr[n] = {3, 2, 4, 5, 1};
+template <typename T>
+auto display(T& container) -> void {
+    for (auto&& item : container) {
+        std::cout << item << ' ';
+    }
+    std::cout << std::endl;
+}
 
-auto main() -> int {}
+auto main() -> int {
+    std::array<int, 5> arr;
+    std::iota(arr.begin(), arr.end(), 0);
+    display(arr);
+    auto v = std::accumulate(arr.begin(), arr.end(), 0);
+    display(arr);
+    std::cout << v << std::endl;
+    return 0;
+}

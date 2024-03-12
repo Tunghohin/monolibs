@@ -1,6 +1,10 @@
 #ifndef __DESIGN_PATTERN_H
 #define __DESIGN_PATTERN_H
 
+#include <functional>
+#include <memory>
+#include <optional>
+#include <unordered_map>
 #include <utility>
 
 #include "./utility.h"
@@ -25,11 +29,16 @@ private:
 };
 
 // OKDP singleton
-template <typename T, bool LongLifeTime = false>
+enum SingletonLifeTime {
+    Default,
+    Extend,
+};
+
+template <typename T, SingletonLifeTime LT = SingletonLifeTime::Default>
 class Singleton;
 
 template <typename T>
-class Singleton<T, false> {
+class Singleton<T, SingletonLifeTime::Default> {
 public:
     template <typename... Args>
     static auto instance(Args&&... args) -> T& {
@@ -49,7 +58,7 @@ private:
 };
 
 template <typename T>
-class Singleton<T, true> {
+class Singleton<T, SingletonLifeTime::Extend> {
 public:
     template <typename... Args>
     static auto instance(Args&&... args) -> T& {
@@ -63,6 +72,16 @@ public:
         }
         return *pInstance_;
     }
+
+protected:
+    Singleton() = default;
+    virtual ~Singleton() {
+        pInstance_ = nullptr;
+        destoryed_ = true;
+    }
+
+    static T* pInstance_;
+    static bool destoryed_;
 
 private:
     template <typename... Args>
@@ -87,26 +106,60 @@ private:
     auto operator=(Singleton&&) -> Singleton& = delete;
 
     static mono::spin_lock lock_;
-
-protected:
-    Singleton() = default;
-    virtual ~Singleton() {
-        pInstance_ = nullptr;
-        destoryed_ = true;
-    }
-
-    static T* pInstance_;
-    static bool destoryed_;
 };
 
 template <typename T>
-T* Singleton<T, true>::pInstance_ = nullptr;
+T* Singleton<T, SingletonLifeTime::Extend>::pInstance_ = nullptr;
 
 template <typename T>
-bool Singleton<T, true>::destoryed_ = false;
+bool Singleton<T, SingletonLifeTime::Extend>::destoryed_ = false;
 
 template <typename T>
-mono::spin_lock Singleton<T, true>::lock_;
+mono::spin_lock Singleton<T, SingletonLifeTime::Extend>::lock_;
+
+// OKDP factory method
+template <typename AbstractProduct>
+class ObjectFactory : public Singleton<ObjectFactory<AbstractProduct>> {
+    using this_type = ObjectFactory<AbstractProduct>;
+
+public:
+    template <typename T>
+        requires std::derived_from<T, AbstractProduct>
+    auto register_type(std::string const& key) -> void {
+        map_.emplace(key, [] { return new T(); });
+    }
+
+    template <typename T, typename... Args>
+        requires std::derived_from<T, AbstractProduct>
+    auto register_type(std::string const& key, Args... args) -> void {
+        map_.emplace(key, [=] { return new T(std::forward<Args>(args)...); });
+    }
+
+    auto unregister(std::string const& key) -> void {
+        this_type::instance().map_.erase(key);
+    }
+
+    auto create(std::string const& key) -> AbstractProduct* {
+        if (this_type::instance().map_.find(key) ==
+            this_type::instance().map_.end()) {
+            return nullptr;
+        }
+        return this_type::instance().map_[key]();
+    }
+
+    auto create_unique(std::string const& key)
+        -> std::unique_ptr<AbstractProduct> {
+        return std::unique_ptr<AbstractProduct>(create(key));
+    }
+
+    auto create_shared(std::string const& key)
+        -> std::shared_ptr<AbstractProduct> {
+        return std::shared_ptr<AbstractProduct>(create(key));
+    }
+
+private:
+    std::unordered_map<std::string, std::function<AbstractProduct*()>> map_;
+};
 
 } // namespace mono
 
