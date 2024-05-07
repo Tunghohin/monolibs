@@ -4,10 +4,12 @@
 #include <array>
 #include <atomic>
 #include <chrono>
-#include <spdlog/fmt/bundled/core.h>
+#include <fmt/format.h>
+#include <functional>
 #include <string>
 #include <type_traits>
 #include <typeinfo>
+#include <utility>
 #if (defined(__GNUC__) || defined(__clang__)) && __has_include(<cxxabi.h>)
 #include <cstdlib>
 #include <cxxabi.h>
@@ -21,7 +23,7 @@ constexpr auto sum(Arg arg) -> Arg {
 }
 
 template <typename Arg0, typename... Args>
-    requires std::is_same_v<Arg0, std::common_type_t<Args...>>
+requires std::is_same_v<Arg0, std::common_type_t<Args...>>
 constexpr auto sum(Arg0 arg0, Args... args) -> std::common_type_t<Args...> {
     return arg0 + sum(args...);
 }
@@ -134,6 +136,26 @@ public:
 private:
     std::atomic_flag flag_ = ATOMIC_FLAG_INIT;
 };
+
+template <typename T, T... ints>
+void print_index_seq(std::integer_sequence<T, ints...> int_seq) {
+    fmt::println("{}", int_seq.size());
+    ((fmt::print("{} ", ints)), ...);
+    fmt::println("");
+}
+
+template <typename Fn, typename Tup, std::size_t... Idx>
+constexpr auto apply_impl(Fn&& f, Tup&& t, std::index_sequence<Idx...>) {
+    return std::invoke(std::forward<Fn>(f),
+                       std::get<Idx>(std::forward<Tup>)...);
+}
+
+template <typename Fn, typename Tup>
+constexpr auto apply(Fn&& f, Tup&& t) {
+    return apply_impl(std::forward<Fn>(f), std::forward<Tup>(t),
+                      std::make_index_sequence<
+                          std::tuple_size_v<std::remove_reference_t<Tup>>>{});
+}
 
 } // namespace mono
 

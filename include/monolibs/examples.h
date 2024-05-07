@@ -1,6 +1,6 @@
 #include <algorithm>
+#include <fmt/format.h>
 #include <memory>
-#include <spdlog/fmt/bundled/core.h>
 #include <utility>
 
 // class with ptr and move ctor
